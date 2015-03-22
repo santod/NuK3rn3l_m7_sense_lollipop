@@ -103,6 +103,7 @@ deps_config := \
 	drivers/platform/msm/Kconfig \
 	drivers/platform/x86/Kconfig \
 	drivers/platform/Kconfig \
+	drivers/staging/cpupower/Kconfig \
 	drivers/staging/ozwpan/Kconfig \
 	drivers/staging/ramster/Kconfig \
 	drivers/staging/telephony/Kconfig \

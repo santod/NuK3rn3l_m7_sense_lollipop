@@ -1329,8 +1329,8 @@ static int usb_resume_both(struct usb_device *udev, pm_message_t msg)
 	/* Resume the interfaces */
 	if (status == 0 && udev->actconfig) {
 		//htc_dbg++
-		int n = udev->actconfig->desc.bNumInterfaces;
-		dev_info(&udev->dev, "%s[%d] resume intf n:%d\n", __func__, __LINE__, n);
+		//int n = udev->actconfig->desc.bNumInterfaces;
+		//dev_info(&udev->dev, "%s[%d] resume intf n:%d\n", __func__, __LINE__, n);
 		//htc_dbg--
 
 		for (i = 0; i < udev->actconfig->desc.bNumInterfaces; i++) {
@@ -1493,6 +1493,15 @@ int usb_suspend(struct device *dev, pm_message_t msg)
 		}
 	}
 
+	if (udev->bus->skip_resume) {
+		if (udev->state == USB_STATE_SUSPENDED) {
+			return 0;
+		} else {
+			dev_err(dev, "abort suspend\n");
+			return -EBUSY;
+		}
+	}
+
 	unbind_no_pm_drivers_interfaces(udev);
 
 	/* From now on we are sure all drivers support suspend/resume
@@ -1536,6 +1545,15 @@ int usb_resume(struct device *dev, pm_message_t msg)
 		/* --SSD_RIL */
 		return 0;
 	}
+
+        /*
+         * Some buses would like to keep their devices in suspend
+         * state after system resume.  Their resume happen when
+         * a remote wakeup is detected or interface driver start
+         * I/O.
+         */
+	if (udev->bus->skip_resume)
+               return 0;
 
 	/* For all calls, take the device back to full power and
 	 * tell the PM core in case it was autosuspended previously.

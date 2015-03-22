@@ -1431,7 +1431,7 @@ static void ptrace_stop(int exit_code, int why, int clear_code, siginfo_t *info)
 		read_unlock(&tasklist_lock);
 	}
 
-	try_to_freeze();
+	try_to_freeze_nowarn();
 
 	spin_lock_irq(&current->sighand->siglock);
 	current->last_siginfo = NULL;
@@ -1991,7 +1991,7 @@ int do_sigtimedwait(const sigset_t *which, siginfo_t *info,
 		recalc_sigpending();
 		spin_unlock_irq(&tsk->sighand->siglock);
 
-		timeout = schedule_timeout_interruptible(timeout);
+		timeout = freezable_schedule_timeout_interruptible(timeout);
 
 		spin_lock_irq(&tsk->sighand->siglock);
 		__set_task_blocked(tsk, &tsk->real_blocked);
